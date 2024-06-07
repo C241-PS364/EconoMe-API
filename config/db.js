@@ -1,48 +1,21 @@
-const { Sequelize } = require('sequelize');
-const dotenv = require('dotenv');
+const { Pool } = require('pg');
+require('dotenv').config();
 
-dotenv.config();
-
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: 'postgres',
-  logging: false,
+const pool = new Pool({
+  host: process.env.INSTANCE_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
 });
 
-const User = require('./userModel');
-const Category = require('./categoryModel');
-const Expense = require('./expenseModel');
-const Income = require('./incomeModel');
+pool.on('connect', () => {
+  console.log('Connected to the database');
+});
 
-const models = {
-  User,
-  Category,
-  Expense,
-  Income,
-};
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
+  process.exit(-1);
+});
 
-const initializeModels = () => {
-  Object.keys(models).forEach((modelName) => {
-    if (models[modelName].associate) {
-      models[modelName].associate(models);
-    }
-  });
-};
-
-const connectDB = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('PostgreSQL Connected...');
-    await sequelize.sync({ force: false });
-    console.log('Database synchronized');
-  } catch (err) {
-    console.error('Unable to connect to the database:', err);
-    process.exit(1);
-  }
-};
-
-module.exports = {
-  sequelize,
-  models,
-  connectDB,
-  initializeModels,
-};
+module.exports = pool;
