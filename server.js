@@ -1,17 +1,24 @@
+
 const express = require('express');
-const dotenv = require('dotenv');
-const { connectDB } = require('./config/db');
-const authRoutes = require('./routes/authRoutes');
-
-dotenv.config();
-connectDB();
-
+const pool = require('./config/db');
 const app = express();
+const port = process.env.PORT || 3000;
 
+// Middleware
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
+// Test Route
+app.get('/', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+});
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Start Server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
