@@ -3,6 +3,7 @@ const pool = require('./config/db');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const authRoutes = require('./routes/v1/auth');
+const userRoutes = require('./routes/v1/user');
 
 dotenv.config();
 
@@ -25,6 +26,8 @@ app.get('/', async (req, res) => {
 
 // Routes registration with versioning
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/user', userRoutes);
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {
