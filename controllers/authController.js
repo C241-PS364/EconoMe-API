@@ -2,6 +2,10 @@ const moment = require('moment');
 const pool = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
+const jwtSecret = process.env.JWT_SECRET;
+
 
 const register = async (req, res) => {
   const { username, password, name, date_of_birth, gender, job } = req.body;
@@ -31,6 +35,39 @@ const register = async (req, res) => {
   }
 };
 
+const login = async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    // Query the database to get the hashed password for the given username
+    const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+
+    if (user.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const storedHashedPassword = user.rows[0].password;
+    const passwordMatch = await bcrypt.compare(password, storedHashedPassword);
+
+    if (!passwordMatch) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign({ userId: user.rows[0].uuid }, jwtSecret, { expiresIn: '1h' });
+
+    res.status(200).json({ token });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   register,
+  login,
+};
+
+
+module.exports = {
+  register,
+  login,
 };
