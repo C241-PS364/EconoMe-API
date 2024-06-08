@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('./config/db');
 const dotenv = require('dotenv');
+const cors = require('cors');
 const authRoutes = require('./routes/v1/auth');
 
 dotenv.config();
@@ -8,6 +9,7 @@ dotenv.config();
 const app = express();
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 
 // Test Route
