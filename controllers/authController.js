@@ -38,25 +38,32 @@ const login = async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    // Query the database to get the hashed password for the given username
-    const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    const user = result.rows[0];
 
-    if (user.rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) {
+      return res.status(401).json({ error: true, message: 'Invalid credentials' });
     }
 
-    const storedHashedPassword = user.rows[0].password;
-    const passwordMatch = await bcrypt.compare(password, storedHashedPassword);
+    const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!passwordMatch) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    if (!isMatch) {
+      return res.status(401).json({ error: true, message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user.rows[0].uuid }, jwtSecret, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user.uuid }, jwtSecret, { expiresIn: process.env.JWT_EXPIRATION_ACCESS });
 
-    res.status(200).json({ token });
+    res.status(200).json({
+      error: false,
+      message: 'success',
+      loginResult: {
+        userId: user.uuid,
+        name: user.name,
+        token: token
+      }
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: true, message: error.message });
   }
 };
 
