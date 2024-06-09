@@ -9,10 +9,17 @@ const pool = new Pool({
   database: process.env.DB_NAME,
 });
 
-pool.on('connect', () => {
-  console.log('Connected to the database');
-});
+(async () => {
+  try {
+    await pool.query('SELECT NOW()');
+    console.log('Connected to the database');
+  } catch (err) {
+    console.error('Failed to connect to the database', err);
+    process.exit(-1);
+  }
+})();
 
+// Handle idle client errors
 pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
   process.exit(-1);
