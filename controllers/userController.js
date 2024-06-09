@@ -2,6 +2,18 @@
 const pool = require('../config/db');
 require('dotenv').config();
 
+const getProfile = async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const result = await pool.query('SELECT id, uuid, name, username, date_of_birth, gender, job, created_at, updated_at FROM users WHERE uuid = $1', [userId]);
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      res.status(200).json(result.rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
 
 const editProfile = async (req, res) => {
     const { name, username, date_of_birth, gender, job } = req.body;
@@ -32,5 +44,6 @@ const editProfile = async (req, res) => {
   };
 
   module.exports = {
+    getProfile,
     editProfile,
   };
