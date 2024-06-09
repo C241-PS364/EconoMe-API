@@ -13,21 +13,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Test Route
+
 app.get('/', async (req, res) => {
   try {
     const result = await pool.query('SELECT NOW()');
-    res.status(200).json(result.rows);
+    res.status(200).json({
+      message: 'Welcome to the EconoMe API',
+      version: '1.0.0',
+      status: 'API is running',
+      serverTime: result.rows[0].now
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Server Error');
+    console.error('Error fetching server time:', err.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// Routes registration with versioning
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/user', userRoutes);
-
 
 // Error handling middleware
 app.use((err, req, res, next) => {
