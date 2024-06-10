@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const jwtSecret = process.env.JWT_SECRET;
+const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
 
 const register = async (req, res) => {
   const { username, password, name, date_of_birth, gender, job } = req.body;
@@ -34,6 +35,7 @@ const register = async (req, res) => {
   }
 };
 
+
 const login = async (req, res) => {
   const { username, password } = req.body;
 
@@ -52,6 +54,7 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user.uuid }, jwtSecret, { expiresIn: process.env.JWT_EXPIRATION_ACCESS });
+    const refreshToken = jwt.sign({ userId: user.uuid }, jwtRefreshSecret, { expiresIn: process.env.JWT_EXPIRATION_REFRESH });
 
     res.status(200).json({
       error: false,
@@ -59,7 +62,8 @@ const login = async (req, res) => {
       loginResult: {
         userId: user.uuid,
         name: user.name,
-        token: token
+        token: token,
+        refreshToken: refreshToken
       }
     });
   } catch (error) {
@@ -67,7 +71,26 @@ const login = async (req, res) => {
   }
 };
 
+
+const refresh = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ error: 'Refresh token is required' });
+  }
+
+  try {
+    const payload = jwt.verify(refreshToken, jwtRefreshSecret);
+    const newToken = jwt.sign({ userId: payload.userId }, jwtSecret, { expiresIn: process.env.JWT_EXPIRATION_ACCESS });
+
+    res.status(200).json({ token: newToken });
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid refresh token' });
+  }
+};
+
 module.exports = {
   register,
   login,
+  refresh,
 };
