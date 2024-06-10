@@ -5,7 +5,7 @@ require('dotenv').config();
 const getProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const result = await pool.query('SELECT id, uuid, name, username, date_of_birth, gender, job, created_at, updated_at FROM users WHERE uuid = $1', [userId]);
+    const result = await pool.query('SELECT id, uuid, name, username, date_of_birth, gender, major, created_at, updated_at FROM users WHERE uuid = $1', [userId]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: true, message: 'User not found' });
     }
@@ -20,17 +20,17 @@ const getProfile = async (req, res) => {
 };
 
 const editProfile = async (req, res) => {
-  const { name, username, date_of_birth, gender, job } = req.body;
+  const { name, username, date_of_birth, gender, major } = req.body;
   const userId = req.user.userId;
 
-  if (!name || !username || !date_of_birth || !gender || !job) {
+  if (!name || !username || !date_of_birth || !gender || !major) {
     return res.status(400).json({ error: true, message: 'All fields are required' });
   }
 
   try {
     const result = await pool.query(
-      'UPDATE users SET name = $1, username = $2, date_of_birth = $3, gender = $4, job = $5, updated_at = NOW() WHERE uuid = $6 RETURNING id, uuid, name, username, date_of_birth, gender, job, created_at, updated_at',
-      [name, username, date_of_birth, gender, job, userId]
+      'UPDATE users SET name = $1, username = $2, date_of_birth = $3, gender = $4, major = $5, updated_at = NOW() WHERE uuid = $6 RETURNING id, uuid, name, username, date_of_birth, gender, job, created_at, updated_at',
+      [name, username, date_of_birth, gender, major, userId]
     );
 
     if (result.rows.length === 0) {
