@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { isBlacklisted } = require('../config/blacklist');
 require('dotenv').config();
 
 const authenticateToken = (req, res, next) => {
@@ -7,6 +8,10 @@ const authenticateToken = (req, res, next) => {
 
   if (!token) {
     return res.status(401).json({ error: true, message: 'Token missing' });
+  }
+
+  if (isBlacklisted(token)) {
+    return res.status(403).json({ error: true, message: 'Token is blacklisted' });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
