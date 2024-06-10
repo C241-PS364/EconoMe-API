@@ -34,7 +34,7 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true
   },
-  job: {
+  major: {
     type: DataTypes.STRING,
     allowNull: true
   },

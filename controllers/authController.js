@@ -9,9 +9,9 @@ const jwtSecret = process.env.JWT_SECRET;
 const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
 
 const register = async (req, res) => {
-  const { username, password, name, date_of_birth, gender, job } = req.body;
+  const { username, password, name, date_of_birth, gender, major } = req.body;
 
-  if (!username || !password || !name || !date_of_birth || !gender || !job) {
+  if (!username || !password || !name || !date_of_birth || !gender || !major) {
     return res.status(400).json({ error: true, message: 'All fields are required' });
   }
 
@@ -23,8 +23,8 @@ const register = async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.query(
-      'INSERT INTO users (uuid, name, username, password, date_of_birth, gender, job) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)',
-      [name, username, hashedPassword, formattedDate.format('YYYY-MM-DD'), gender, job]
+      'INSERT INTO users (uuid, name, username, password, date_of_birth, gender, major) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)',
+      [name, username, hashedPassword, formattedDate.format('YYYY-MM-DD'), gender, major]
     );
     res.status(201).json({ error: false, message: 'User Created' });
   } catch (error) {
