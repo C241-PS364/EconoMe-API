@@ -2,6 +2,7 @@ const moment = require('moment');
 const pool = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { addToBlacklist } = require('../config/blacklist');
 require('dotenv').config();
 
 const jwtSecret = process.env.JWT_SECRET;
@@ -89,8 +90,18 @@ const refresh = async (req, res) => {
   }
 };
 
+const logout = (req, res) => {
+  const token = req.headers['authorization'].split(' ')[1];
+
+  // Add token to blacklist with a 24-hour expiration
+  addToBlacklist(token, 24 * 3600); // 24 hours in seconds
+
+  res.status(200).json({ message: 'Logged out successfully' });
+};
+
 module.exports = {
   register,
   login,
+  logout,
   refresh,
 };
