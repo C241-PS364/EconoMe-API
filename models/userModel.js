@@ -38,6 +38,10 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true
   },
+  age: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
 }, {
   hooks: {
     beforeSave: async (user) => {
