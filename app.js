@@ -16,12 +16,10 @@ app.use(express.json());
 
 app.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT NOW()');
     res.status(200).json({
       message: 'Welcome to the EconoMe API',
       version: '1.0.0',
       status: 'API is running',
-      serverTime: result.rows[0].now
     });
   } catch (err) {
     console.error('Error fetching server time:', err.message);
