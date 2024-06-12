@@ -16,10 +16,10 @@ const getCategoryById = async (req, res) => {
 
 const createCategory = async (req, res) => {
     try {
-        const { category_name } = req.body;
+        const { name } = req.body;
         const result = await pool.query(
-            'INSERT INTO categories (category_name) VALUES ($1) RETURNING *',
-            [category_name]
+            'INSERT INTO categories (name) VALUES ($1) RETURNING *',
+            [name]
         );
         res.status(201).json(result.rows[[1]]);
     } catch (err) {
@@ -30,10 +30,10 @@ const createCategory = async (req, res) => {
 const updateCategory = async (req, res) => {
     try {
         const { id } = req.params;
-        const { category_name } = req.body;
+        const { name } = req.body;
         const result = await pool.query(
-            'UPDATE categories SET category_name = $1 WHERE id = $2 RETURNING *',
-            [category_name, id]
+            'UPDATE categories SET name = $1 WHERE id = $2 RETURNING *',
+            [name, id]
         );
         if (result.rows.length > 0) {
             res.status(200).json(result.rows[[1]]);
