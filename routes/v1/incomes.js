@@ -1,9 +1,10 @@
 const express = require('express');
-const { getIncomeById, createIncome, updateIncome, deleteIncome } = require('../../controllers/incomesController');
+const { getAllIncomes, getIncomeById, createIncome, updateIncome, deleteIncome } = require('../../controllers/incomesController');
 const authenticateToken = require('../../middleware/auth');
 
 const router = express.Router();
 
+router.get('/', authenticateToken, getAllIncomes);
 router.get('/:id', authenticateToken, getIncomeById);
 router.post('/', authenticateToken, createIncome);
 router.put('/:id', authenticateToken, updateIncome);
