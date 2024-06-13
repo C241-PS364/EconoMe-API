@@ -64,20 +64,54 @@ const createIncome = async (req, res) => {
 };
 
 const updateIncome = async (req, res) => {
+    const { id } = req.params;
+    const { date, title, amount } = req.body;
+    const userId = req.user.userId;
+
+    if (!date || !title || amount == null) {
+        return res.status(400).json({
+            error: true,
+            message: 'All fields (date, title, amount) are required'
+        });
+    }
+
+    if (!Number.isInteger(amount)) {
+        return res.status(400).json({
+            error: true,
+            message: 'Amount must be an integer'
+        });
+    }
+
+    const formattedDate = moment(date, 'YYYY-MM-DD', true);
+    if (!formattedDate.isValid()) {
+        return res.status(400).json({
+            error: true,
+            message: 'Date must be in the format YYYY-MM-DD'
+        });
+    }
+
     try {
-        const { id } = req.params;
-        const { date, title, amount, user_id } = req.body;
         const result = await pool.query(
-            'UPDATE incomes SET date = $1, title = $2, amount = $3, user_id = $4 WHERE id = $5 RETURNING *',
-            [date, title, amount, user_id, id]
+            'UPDATE incomes SET date = $1, title = $2, amount = $3, user_uuid = $4 WHERE id = $5 RETURNING *',
+            [formattedDate.format('YYYY-MM-DD'), title, amount, userId, id]
         );
         if (result.rows.length > 0) {
-            res.status(200).json(result.rows[[1]]);
+            res.status(200).json({
+                error: false,
+                message: 'Income updated successfully',
+                data: result.rows[0]
+            });
         } else {
-            res.status(404).json({ message: 'Income not found' });
+            res.status(404).json({
+                error: true,
+                message: 'Income not found'
+            });
         }
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({
+            error: true,
+            message: err.message
+        });
     }
 };
 
