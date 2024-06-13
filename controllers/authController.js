@@ -9,22 +9,17 @@ const jwtSecret = process.env.JWT_SECRET;
 const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
 
 const register = async (req, res) => {
-  const { username, password, name, date_of_birth, gender, major, age } = req.body;
+  const { username, password, name, gender, major, age } = req.body;
 
-  if (!username || !password || !name || !date_of_birth || !gender || !major || !age) {
+  if (!username || !password || !name || !gender || !major || !age) {
     return res.status(400).json({ error: true, message: 'All fields are required' });
-  }
-
-  const formattedDate = moment(date_of_birth, 'YYYY-MM-DD', true);
-  if (!formattedDate.isValid()) {
-    return res.status(400).json({ error: true, message: 'Invalid date format. Use YYYY-MM-DD' });
   }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.query(
-      'INSERT INTO users (uuid, name, username, password, date_of_birth, gender, major, age) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7)',
-      [name, username, hashedPassword, formattedDate.format('YYYY-MM-DD'), gender, major, age]
+      'INSERT INTO users (uuid, name, username, password, gender, major, age) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)',
+      [name, username, hashedPassword, gender, major, age]
     );
     res.status(201).json({ error: false, message: 'User Created' });
   } catch (error) {
