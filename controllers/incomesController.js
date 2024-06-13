@@ -1,3 +1,4 @@
+const moment = require('moment');
 const pool = require('../config/db');
 
 const getIncomeById = async (req, res) => {
@@ -19,15 +20,46 @@ const getIncomeById = async (req, res) => {
 };
 
 const createIncome = async (req, res) => {
+    const { date, title, amount } = req.body;
+    const userId = req.user.userId;
+
+    if (!date || !title || amount == null) {
+        return res.status(400).json({
+            error: true,
+            message: 'All fields (date, title, amount) are required'
+        });
+    }
+
+    if (!Number.isInteger(amount)) {
+        return res.status(400).json({
+            error: true,
+            message: 'Amount must be an integer'
+        });
+    }
+
+    const formattedDate = moment(date, 'YYYY-MM-DD', true);
+    if (!formattedDate.isValid()) {
+        return res.status(400).json({
+            error: true,
+            message: 'Date must be in the format YYYY-MM-DD'
+        });
+    }
+
     try {
-        const { date, title, amount, user_id } = req.body;
         const result = await pool.query(
-            'INSERT INTO incomes (date, title, amount, user_id) VALUES ($1, $2, $3, $4) RETURNING *',
-            [date, title, amount, user_id]
+            'INSERT INTO incomes (date, title, amount, user_uuid) VALUES ($1, $2, $3, $4) RETURNING *',
+            [formattedDate.format('YYYY-MM-DD'), title, amount, userId]
         );
-        res.status(201).json(result.rows[[1]]);
+        res.status(201).json({
+            error: false,
+            message: 'Income added successfully',
+            data: result.rows[0]
+        });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({
+            error: true,
+            message: err.message
+        });
     }
 };
 
