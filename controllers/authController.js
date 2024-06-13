@@ -61,7 +61,7 @@ const login = async (req, res) => {
       res.status(200).json({
           error: false,
           message: 'success',
-          loginResult: {
+          data: {
               userId: user.uuid,
               name: user.name,
               token: token,

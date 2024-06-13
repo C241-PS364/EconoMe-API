@@ -12,7 +12,7 @@ const getProfile = async (req, res) => {
     res.status(200).json({
       error: false,
       message: 'Profile fetched successfully',
-      profile: result.rows[0]
+      data: result.rows[0]
     });
   } catch (error) {
     res.status(500).json({ error: true, message: error.message });
@@ -40,7 +40,7 @@ const editProfile = async (req, res) => {
     res.status(200).json({
       error: false,
       message: 'Profile updated successfully',
-      profile: result.rows[0]
+      data: result.rows[0]
     });
   } catch (error) {
     if (error.code === '23505' && error.constraint === 'users_username_key') {
