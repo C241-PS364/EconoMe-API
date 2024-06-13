@@ -32,7 +32,7 @@ app.get('/', async (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/incomes', incomesRouter);
-app.use('/api/v1/category', categoryRouter);
+app.use('/api/v1/categories', categoryRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
