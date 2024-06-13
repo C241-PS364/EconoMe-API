@@ -116,16 +116,27 @@ const updateIncome = async (req, res) => {
 };
 
 const deleteIncome = async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.userId;
+
     try {
-        const { id } = req.params;
-        const result = await pool.query('DELETE FROM incomes WHERE id = $1 RETURNING *', [id]);
+        const result = await pool.query('DELETE FROM incomes WHERE id = $1 AND user_uuid = $2 RETURNING *', [id, userId]);
         if (result.rows.length > 0) {
-            res.status(200).json({ message: 'Income deleted' });
+            res.status(200).json({
+                error: false,
+                message: 'Income deleted successfully'
+            });
         } else {
-            res.status(404).json({ message: 'Income not found' });
+            res.status(404).json({
+                error: true,
+                message: 'Income not found'
+            });
         }
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({
+            error: true,
+            message: err.message
+        });
     }
 };
 
