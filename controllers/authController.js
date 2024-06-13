@@ -9,22 +9,17 @@ const jwtSecret = process.env.JWT_SECRET;
 const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
 
 const register = async (req, res) => {
-  const { username, password, name, date_of_birth, gender, major, age } = req.body;
+  const { username, password, name, gender, major, age } = req.body;
 
-  if (!username || !password || !name || !date_of_birth || !gender || !major || !age) {
+  if (!username || !password || !name || !gender || !major || !age) {
     return res.status(400).json({ error: true, message: 'All fields are required' });
-  }
-
-  const formattedDate = moment(date_of_birth, 'YYYY-MM-DD', true);
-  if (!formattedDate.isValid()) {
-    return res.status(400).json({ error: true, message: 'Invalid date format. Use YYYY-MM-DD' });
   }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.query(
-      'INSERT INTO users (uuid, name, username, password, date_of_birth, gender, major, age) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7)',
-      [name, username, hashedPassword, formattedDate.format('YYYY-MM-DD'), gender, major, age]
+      'INSERT INTO users (uuid, name, username, password, gender, major, age) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)',
+      [name, username, hashedPassword, gender, major, age]
     );
     res.status(201).json({ error: false, message: 'User Created' });
   } catch (error) {
@@ -39,36 +34,45 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   const { username, password } = req.body;
+  const jwtSecret = process.env.JWT_SECRET;
+  const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
+
+  if (!jwtSecret || !jwtRefreshSecret) {
+      return res.status(500).json({ error: true, message: 'JWT secrets not set in environment variables' });
+  }
 
   try {
-    const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
-    const user = result.rows[0];
+      const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+      const user = result.rows[0];
 
-    if (!user) {
-      return res.status(401).json({ error: true, message: 'Invalid credentials' });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({ error: true, message: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign({ userId: user.uuid }, jwtSecret, { expiresIn: process.env.JWT_EXPIRATION_ACCESS });
-    const refreshToken = jwt.sign({ userId: user.uuid }, jwtRefreshSecret, { expiresIn: process.env.JWT_EXPIRATION_REFRESH });
-
-    res.status(200).json({
-      error: false,
-      message: 'success',
-      loginResult: {
-        userId: user.uuid,
-        name: user.name,
-        token: token,
-        refreshToken: refreshToken
+      if (!user) {
+          return res.status(401).json({ error: true, message: 'Invalid credentials' });
       }
-    });
+
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) {
+          return res.status(401).json({ error: true, message: 'Invalid credentials' });
+      }
+
+      const token = jwt.sign({ userId: user.uuid }, jwtSecret, { expiresIn: process.env.JWT_EXPIRATION_ACCESS });
+      const refreshToken = jwt.sign({ userId: user.uuid }, jwtRefreshSecret, { expiresIn: process.env.JWT_EXPIRATION_REFRESH });
+
+      res.status(200).json({
+          error: false,
+          message: 'success',
+          data: {
+              userId: user.uuid,
+              name: user.name,
+              token: token,
+              refreshToken: refreshToken
+          }
+      });
   } catch (error) {
-    res.status(500).json({ error: true, message: error.message });
+      res.status(500).json({
+          error: true,
+          message: error.message
+      });
   }
 };
 
