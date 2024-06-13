@@ -37,6 +37,15 @@ const login = async (req, res) => {
   const jwtSecret = process.env.JWT_SECRET;
   const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
 
+  console.log('INSTANCE_HOST:', process.env.INSTANCE_HOST);
+  console.log('DB_PORT:', process.env.DB_PORT);
+  console.log('DB_NAME:', process.env.DB_NAME);
+  console.log('DB_USER:', process.env.DB_USER);
+  console.log('DB_PASS:', process.env.DB_PASS);
+  console.log('JWT_SECRET:', process.env.JWT_SECRET);
+  console.log('JWT_REFRESH_SECRET:', process.env.JWT_REFRESH_SECRET);
+
+
   if (!jwtSecret || !jwtRefreshSecret) {
       return res.status(500).json({ error: true, message: 'JWT secrets not set in environment variables' });
   }
