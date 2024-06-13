@@ -24,6 +24,38 @@ const getAllIncomes = async (req, res) => {
     }
 };
 
+const getMonthlyIncomes = async (req, res) => {
+    const { year, month } = req.params;
+    const userId = req.user.userId;
+
+    try {
+        const result = await pool.query(
+            'SELECT * FROM incomes WHERE user_uuid = $1 AND EXTRACT(YEAR FROM date) = $2 AND EXTRACT(MONTH FROM date) = $3 ORDER BY date DESC',
+            [userId, year, month]
+        );
+
+        const formattedData = result.rows.map(income => ({
+            ...income,
+            date: moment(income.date).format('YYYY-MM-DD'),
+            amount: parseInt(income.amount)
+        }));
+
+        const totalAmount = formattedData.reduce((sum, income) => sum + income.amount, 0);
+
+        res.status(200).json({
+            error: false,
+            message: 'Monthly incomes fetched successfully',
+            data: formattedData,
+            total_amount: totalAmount
+        });
+    } catch (err) {
+        res.status(500).json({
+            error: true,
+            message: err.message
+        });
+    }
+};
+
 const getIncomeById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -165,6 +197,7 @@ const deleteIncome = async (req, res) => {
 
 module.exports = {
     getAllIncomes,
+    getMonthlyIncomes,
     getIncomeById,
     createIncome,
     updateIncome,
