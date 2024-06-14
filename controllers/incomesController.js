@@ -3,12 +3,12 @@ const pool = require('../config/db');
 
 const getAllIncomes = async (req, res) => {
     const userId = req.user.userId;
-
     try {
         const result = await pool.query('SELECT * FROM incomes WHERE user_uuid = $1 ORDER BY date DESC', [userId]);
         const formattedData = result.rows.map(income => ({
-            ...income,
+            id: income.id,
             date: moment(income.date).format('YYYY-MM-DD'),
+            title: income.title,
             amount: parseInt(income.amount)
         }));
         res.status(200).json({
@@ -35,8 +35,9 @@ const getMonthlyIncomes = async (req, res) => {
         );
 
         const formattedData = result.rows.map(income => ({
-            ...income,
+            id: income.id,
             date: moment(income.date).format('YYYY-MM-DD'),
+            title: income.title,
             amount: parseInt(income.amount)
         }));
 
