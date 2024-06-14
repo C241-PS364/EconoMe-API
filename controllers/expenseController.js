@@ -59,6 +59,73 @@ const createExpense = async (req, res) => {
     }
 };
 
+const updateExpense = async (req, res) => {
+    const { id } = req.params;
+    const { date, title, category_id, amount } = req.body;
+    const userId = req.user.userId;
+
+    if (!date || !title || !category_id || amount == null) {
+        return res.status(400).json({
+            error: true,
+            message: 'All fields (date, title, category_id, amount) are required'
+        });
+    }
+
+    if (!Number.isInteger(amount)) {
+        return res.status(400).json({
+            error: true,
+            message: 'Amount must be an integer'
+        });
+    }
+
+    const formattedDate = moment(date, 'YYYY-MM-DD', true);
+    if (!formattedDate.isValid()) {
+        return res.status(400).json({
+            error: true,
+            message: 'Date must be in the format YYYY-MM-DD'
+        });
+    }
+
+    try {
+        const result = await pool.query(
+            'UPDATE expenses SET date = $1, title = $2, category_id = $3, amount = $4 WHERE id = $5 AND user_uuid = $6 RETURNING *',
+            [formattedDate.format('YYYY-MM-DD'), title, category_id, amount, id, userId]
+        );
+        if (result.rows.length > 0) {
+            const expense = result.rows[0];
+            res.status(200).json({
+                error: false,
+                message: 'Expense updated successfully',
+                data: {
+                    id: expense.id,
+                    date: moment(expense.date).format('YYYY-MM-DD'),
+                    title: expense.title,
+                    category_id: expense.category_id,
+                    amount: parseInt(expense.amount)
+                }
+            });
+        } else {
+            res.status(404).json({
+                error: true,
+                message: 'Expense not found'
+            });
+        }
+    } catch (err) {
+        if (err.code === '23503') {
+            res.status(400).json({
+                error: true,
+                message: 'Invalid category_id'
+            });
+        } else {
+            res.status(500).json({
+                error: true,
+                message: err.message
+            });
+        }
+    }
+};
+
 module.exports = {
-    createExpense
+    createExpense,
+    updateExpense
 };
