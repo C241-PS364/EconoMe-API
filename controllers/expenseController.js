@@ -11,7 +11,7 @@ const getExpenses = async (req, res) => {
             date: moment(expense.date).format('YYYY-MM-DD'),
             title: expense.title,
             category_id: expense.category_id,
-            amount: parseInt(expense.amount) // Ensure amount is an integer
+            amount: parseInt(expense.amount)
         }));
         res.status(200).json({
             error: false,
