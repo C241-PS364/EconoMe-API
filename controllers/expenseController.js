@@ -87,6 +87,14 @@ const createExpense = async (req, res) => {
     }
 
     try {
+        const categoryCheck = await pool.query('SELECT * FROM categories WHERE id = $1', [category_id]);
+        if (categoryCheck.rows.length === 0) {
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid category_id'
+            });
+        }
+
         const result = await pool.query(
             'INSERT INTO expenses (date, title, category_id, amount, user_uuid) VALUES ($1, $2, $3, $4, $5) RETURNING *',
             [formattedDate.format('YYYY-MM-DD'), title, category_id, amount, userId]
@@ -104,17 +112,10 @@ const createExpense = async (req, res) => {
             }
         });
     } catch (err) {
-        if (err.code === '23503') {
-            res.status(400).json({
-                error: true,
-                message: 'Invalid category_id'
-            });
-        } else {
-            res.status(500).json({
-                error: true,
-                message: err.message
-            });
-        }
+        res.status(500).json({
+            error: true,
+            message: err.message
+        });
     }
 };
 
@@ -146,6 +147,14 @@ const updateExpense = async (req, res) => {
     }
 
     try {
+        const categoryCheck = await pool.query('SELECT * FROM categories WHERE id = $1', [category_id]);
+        if (categoryCheck.rows.length === 0) {
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid category_id'
+            });
+        }
+
         const result = await pool.query(
             'UPDATE expenses SET date = $1, title = $2, category_id = $3, amount = $4 WHERE id = $5 AND user_uuid = $6 RETURNING *',
             [formattedDate.format('YYYY-MM-DD'), title, category_id, amount, id, userId]
@@ -170,17 +179,10 @@ const updateExpense = async (req, res) => {
             });
         }
     } catch (err) {
-        if (err.code === '23503') {
-            res.status(400).json({
-                error: true,
-                message: 'Invalid category_id'
-            });
-        } else {
-            res.status(500).json({
-                error: true,
-                message: err.message
-            });
-        }
+        res.status(500).json({
+            error: true,
+            message: err.message
+        });
     }
 };
 
