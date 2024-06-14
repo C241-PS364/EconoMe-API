@@ -1,6 +1,31 @@
 const moment = require('moment');
 const pool = require('../config/db');
 
+const getExpenses = async (req, res) => {
+    const userId = req.user.userId;
+
+    try {
+        const result = await pool.query('SELECT * FROM expenses WHERE user_uuid = $1 ORDER BY date DESC', [userId]);
+        const expenses = result.rows.map(expense => ({
+            id: expense.id,
+            date: moment(expense.date).format('YYYY-MM-DD'),
+            title: expense.title,
+            category_id: expense.category_id,
+            amount: parseInt(expense.amount) // Ensure amount is an integer
+        }));
+        res.status(200).json({
+            error: false,
+            message: 'Expenses fetched successfully',
+            data: expenses
+        });
+    } catch (err) {
+        res.status(500).json({
+            error: true,
+            message: err.message
+        });
+    }
+};
+
 const createExpense = async (req, res) => {
     const { date, title, category_id, amount } = req.body;
     const userId = req.user.userId;
@@ -151,6 +176,7 @@ const deleteExpense = async (req, res) => {
 };
 
 module.exports = {
+    getExpenses,
     createExpense,
     updateExpense,
     deleteExpense
