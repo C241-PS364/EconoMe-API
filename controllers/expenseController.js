@@ -26,6 +26,40 @@ const getExpenses = async (req, res) => {
     }
 };
 
+const getMonthlyExpenses = async (req, res) => {
+    const userId = req.user.userId;
+    const { year, month } = req.params;
+
+    try {
+        const result = await pool.query(
+            'SELECT * FROM expenses WHERE user_uuid = $1 AND EXTRACT(YEAR FROM date) = $2 AND EXTRACT(MONTH FROM date) = $3 ORDER BY date DESC',
+            [userId, year, month]
+        );
+        
+        const expenses = result.rows.map(expense => ({
+            id: expense.id,
+            date: moment(expense.date).format('YYYY-MM-DD'),
+            title: expense.title,
+            category_id: expense.category_id,
+            amount: parseInt(expense.amount)
+        }));
+
+        const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+        res.status(200).json({
+            error: false,
+            message: 'Monthly expenses fetched successfully',
+            data: expenses,
+            total_amount: totalAmount
+        });
+    } catch (err) {
+        res.status(500).json({
+            error: true,
+            message: err.message
+        });
+    }
+};
+
 const createExpense = async (req, res) => {
     const { date, title, category_id, amount } = req.body;
     const userId = req.user.userId;
@@ -177,6 +211,7 @@ const deleteExpense = async (req, res) => {
 
 module.exports = {
     getExpenses,
+    getMonthlyExpenses,
     createExpense,
     updateExpense,
     deleteExpense
