@@ -125,7 +125,33 @@ const updateExpense = async (req, res) => {
     }
 };
 
+const deleteExpense = async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.userId;
+
+    try {
+        const result = await pool.query('DELETE FROM expenses WHERE id = $1 AND user_uuid = $2 RETURNING *', [id, userId]);
+        if (result.rows.length > 0) {
+            res.status(200).json({
+                error: false,
+                message: 'Expense deleted successfully'
+            });
+        } else {
+            res.status(404).json({
+                error: true,
+                message: 'Expense not found'
+            });
+        }
+    } catch (err) {
+        res.status(500).json({
+            error: true,
+            message: err.message
+        });
+    }
+};
+
 module.exports = {
     createExpense,
-    updateExpense
+    updateExpense,
+    deleteExpense
 };
