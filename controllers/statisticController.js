@@ -71,7 +71,6 @@ const getTopSpending = async (req, res) => {
             startDate = moment().subtract(30, 'days').format('YYYY-MM-DD');
             endDate = moment().format('YYYY-MM-DD');
             break;
-        case 'all-time':
         default:
             startDate = null;
             endDate = null;
