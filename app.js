@@ -7,6 +7,7 @@ const userRoutes = require('./routes/v1/user');
 const incomesRouter = require('./routes/v1/incomes');
 const categoryRouter = require('./routes/v1/category');
 const expensesRouter = require('./routes/v1/expense');
+const transactionRouter = require('./routes/v1/transaction');
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/incomes', incomesRouter);
 app.use('/api/v1/categories', categoryRouter);
 app.use('/api/v1/expenses', expensesRouter);
+app.use('/api/v1/transactions', transactionRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
