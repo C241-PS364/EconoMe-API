@@ -44,7 +44,7 @@ const getStatistics = async (req, res) => {
             data: result.rows.map(row => ({
                 category_name: row.category_name,
                 total_spent: parseInt(row.total_spent),
-                percentage: (parseInt(row.total_spent) / totalExpense * 100).toFixed(2)
+                percentage: parseFloat(((parseInt(row.total_spent) / totalExpense) * 100).toFixed(2))
             })),
             total_expense: totalExpense
         });
