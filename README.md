@@ -118,7 +118,7 @@ To connect to Cloud SQL through Cloud SQL Proxy, follow the steps provided in th
 Set the environment variables in the Cloud Run service:
 
 1. Go to the Cloud Run service in the Google Cloud Console.
-2. Select your service (econome-api).
+2. Select your service (EconomeAPI).
 3. Click on "Edit & Deploy New Revision".
 4. Scroll down to "Environment variables" and add the necessary environment variables.
 5. Deploy the revision.
