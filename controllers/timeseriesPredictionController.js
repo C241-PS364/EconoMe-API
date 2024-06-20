@@ -58,10 +58,11 @@ const calculateForecastSum = (predictions, numDays) => {
 const predictTimeSeries = async (req, res) => {
   try {
     const userUuid = req.user.userId;
-    const { startDate, endDate } = req.body; // Remove sequenceLength from the request body
+    const { startDate, endDate } = req.query; // Use query parameters
 
     // Fetch the user's expense data
     const expenseData = await fetchExpenseData(userUuid, startDate, endDate);
+    
     if (expenseData.length < SEQUENCE_LENGTH) { // Use SEQUENCE_LENGTH directly
       return res.status(400).json({ error: true, message: 'Not enough data to make a prediction' });
     }
@@ -90,9 +91,11 @@ const predictTimeSeries = async (req, res) => {
     res.status(200).json({
       error: false,
       message: 'Prediction made successfully',
-      nextDayPrediction: nextDayPrediction.toFixed(2),
-      weeklyForecast: weeklyForecast.toFixed(2),
-      monthlyForecast: monthlyForecast.toFixed(2)
+      data: {
+        nextDayPrediction: parseFloat(nextDayPrediction.toFixed(2)),
+        weeklyForecast: parseFloat(weeklyForecast.toFixed(2)),
+        monthlyForecast: parseFloat(monthlyForecast.toFixed(2))
+      }
     });
   } catch (error) {
     console.error('Error:', error);
