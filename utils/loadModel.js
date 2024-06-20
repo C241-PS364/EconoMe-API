@@ -2,6 +2,7 @@ const tf = require('@tensorflow/tfjs-node');
 
 const modelUrls = {
   monthlyExpensePrediction: 'https://storage.googleapis.com/econome-models/monthly-expense-prediction/model.json',
+  timeSeriesPrediction: 'https://storage.googleapis.com/econome-models/time-series-prediction/model.json',
 };
 
 const loadModel = async (modelName) => {
